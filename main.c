@@ -1,50 +1,48 @@
 #include "monty.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+bus_t bus = {NULL, NULL, NULL, 0};
 /**
- * main - the entry point
- * @argc: this is the argument count
- * @argv: this is the argument vector
- * Return: can return exit fail or exit success
- */
-int data = -1;
+* main - entry point
+* @argc: argument counter
+* @argv: argument vector
+* Return: as always it returns 0
+*/
 int main(int argc, char *argv[])
 {
-	FILE *fd;
-	char buffer[1024], **tokens, *buffercpy;
+	char *content;
+	FILE *file;
+	size_t size = 0;
+	ssize_t read_line = 1;
 	stack_t *stack = NULL;
-	unsigned int line_number;
+	unsigned int counter = 0;
 
 	if (argc != 2)
 	{
 		fprintf(stderr, "USAGE: monty file\n");
 		exit(EXIT_FAILURE);
 	}
-	fd = fopen(argv[1], "r");
-	if (fd == NULL)
-		mError();
-	line_number = 1;
-	while (fgets(buffer, sizeof(buffer), fd) != NULL)
+	file = fopen(argv[1], "r");
+	bus.file = file;
+	if (!file)
 	{
-		printf("%s", buffer);
-		buffercpy = strdup(buffer);
-		printf("%s", buffercpy);
-		tokens = tokenize(buffercpy);
-		if (tokens[1] = "0")
-			data = 0;
-		else if (atoi(tokens[1]) == 0)
-			data = -1;
-		else if (atoi(tokens[1]) != 0)
-			data = atoi(tokens[1]);
-		//execute(tokens[0], &stack, line_number);
-		//printf("function executed");
-		printf("%s, %s\n", tokens[0], tokens[1]);
-		line_number++;
-		printf("line: %u\n", line_number);
-		//printf("still in the loop");
+		fprintf(stderr, "Error: Can't open file %s\n", argv[1]);
+		exit(EXIT_FAILURE);
 	}
-	printf("loop ended");
-	fclose(fd);
-	return 0;
+	while (read_line > 0)
+	{
+		content = NULL;
+		read_line = getline(&content, &size, file);
+		bus.content = content;
+		counter++;
+		if (read_line > 0)
+		{
+			execute(content, &stack, counter, file);
+		}
+		free(content);
+	}
+	free_stack(stack);
+	fclose(file);
+return (0);
 }
-
-

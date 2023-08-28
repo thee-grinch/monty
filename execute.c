@@ -1,62 +1,51 @@
 #include "monty.h"
 /**
- * initialize - initializes an instruction pointer
- * @pointer: the pointer to be initialized
- * @opcode: the opcopde part
- * @func: the function pointer
- */
-void initialize(instruction_t *pointer, char *opcode, void (*func)(stack_t**, unsigned int))
+* execute - used to execute an opcode
+* @stack: this is a pointer to the stack
+* @counter: this is the line number
+* @file: this is the file pointer
+* @content: this is the content of the line read
+*/
+int execute(char *content, stack_t **stack, unsigned int counter, FILE *file)
 {
-	pointer->opcode = opcode;
-	pointer->f = func;
-}
-/**
- * execute - executes a function
- * @opcode: the opcode to be excecuted
- * @stack: the stack to be excecuted
- * @line_number: the number of the line
- *
- */
-void (*execute(char *opcode, stack_t **stack, unsigned int line_number))(stack_t **stack, unsigned int line_number)
-{
-	instruction_t *instPush, *instPall, *instArr[2];
-	int i;
-	void (*f)(stack_t **, unsigned int);
+	instruction_t opst[] = {
+				{"push", f_push}, {"pall", f_pall}, {"pint", f_pint},
+				{"pop", f_pop},
+				{"swap", f_swap},
+				{"add", f_add},
+				{"nop", f_nop},
+				{"sub", f_sub},
+				{"div", f_div},
+				{"mul", f_mul},
+				{"mod", f_mod},
+				{"pchar", f_pchar},
+				{"pstr", f_pstr},
+				{"rotl", f_rotl},
+				{"rotr", f_rotr},
+				{"queue", f_queue},
+				{"stack", f_stack},
+				{NULL, NULL}
+				};
+	unsigned int i = 0;
+	char *op;
 
-	instPush = malloc(sizeof(instruction_t));
-	if (!instPush)
-		mError();
-	printf("allocated 1\n");
-	initialize(instPush, "push", push);
-	instPall = malloc(sizeof(instruction_t));
-	if (!instPall)
-		mError();
-	
-	printf("allocated 2\n");
-	initialize(instPall, "pall", pall);
-	printf("expecting error\n");
-	instArr[0] = instPush;
-	printf("arrsy i\n");
-	instArr[1] = instPall;
-	for (i = 0; instArr[i] != NULL; i++)
+	op = strtok(content, " \n\t");
+	if (op && op[0] == '#')
+		return (0);
+	bus.arg = strtok(NULL, " \n\t");
+	while (opst[i].opcode && op)
 	{
-		if (strcmp(instArr[i]->opcode,opcode) == 0)
-		{
-			printf("code runing\n");
-			f = instArr[i]->f;
-			printf("123\n");
-			f(stack, line_number);
-			printf("fsfd\n");
+		if (strcmp(op, opst[i].opcode) == 0)
+		{	opst[i].f(stack, counter);
+			return (0);
 		}
-		if (instArr[i + 1] == NULL)
-		{
-			fprintf(stderr, "L%u: unknown instruction %s\n", line_number, opcode);
-			exit(EXIT_FAILURE);
-		}
+		i++;
 	}
-	printf("No error\n");
+	if (op && opst[i].opcode == NULL)
+	{ fprintf(stderr, "L%d: unknown instruction %s\n", counter, op);
+		fclose(file);
+		free(content);
+		free_stack(*stack);
+		exit(EXIT_FAILURE); }
+	return (1);
 }
-
-
-
-

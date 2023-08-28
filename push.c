@@ -1,32 +1,36 @@
 #include "monty.h"
 /**
- * push - adds an item to the top of a linked list
- * @stack: the pointer to the stack
- * @line_number: the line number being executed
- */
-void push(stack_t **stack, unsigned int line_number)
+ * f_push - used to add a node at the top
+ * @head: this is the head of the stack
+ * @counter: the line number with the instruction
+*/
+void f_push(stack_t **head, unsigned int counter)
 {
-	stack_t *new;
+	int n, j = 0, flag = 0;
 
-	printf("function called\n");
-
-	if (data == -1)
+	if (bus.arg)
 	{
-		fprintf(stderr, "L %u: usage: push integer\n", line_number);
-		exit(EXIT_FAILURE);
-	}
-	new = malloc(sizeof(stack_t));
-	if (!new)
-	{
-		fprintf(stderr, "Error malloc failed\n");
-		exit(EXIT_FAILURE);
-	}
-	new->n = data;
-	data = -1;
-	if (!stack)
-		new->prev = NULL;
+		if (bus.arg[0] == '-')
+			j++;
+		for (; bus.arg[j] != '\0'; j++)
+		{
+			if (bus.arg[j] > 57 || bus.arg[j] < 48)
+				flag = 1; }
+		if (flag == 1)
+		{ fprintf(stderr, "L%d: usage: push integer\n", counter);
+			fclose(bus.file);
+			free(bus.content);
+			free_stack(*head);
+			exit(EXIT_FAILURE); }}
 	else
-		new->prev = *stack;
-	new->next = NULL;
-	*stack = new;
+	{ fprintf(stderr, "L%d: usage: push integer\n", counter);
+		fclose(bus.file);
+		free(bus.content);
+		free_stack(*head);
+		exit(EXIT_FAILURE); }
+	n = atoi(bus.arg);
+	if (bus.lifi == 0)
+		addnode(head, n);
+	else
+		addqueue(head, n);
 }
